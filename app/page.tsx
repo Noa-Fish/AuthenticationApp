@@ -1,7 +1,7 @@
+"use client"
 import { Metadata } from "next"
-import Image from "next/image"
 import Link from "next/link"
-
+import axios from "axios"
 import { cn } from "@/lib/utils"
 import { buttonVariants } from "@/components/ui/button"
 import { UserAuthForm } from "@/components/user-auth-form"
@@ -12,13 +12,27 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { useCallback } from "react"
 
-export const metadata: Metadata = {
-  title: "Authentication",
-  description: "Authentication forms built using the components.",
-}
+
 
 export default function AuthenticationPage() {
+
+  // const register = useCallback(async () => {
+  //   try {
+  //     await axios.post('/api/register', {
+  //       email,
+  //       password
+  //     })
+  //   } catch (e) {
+
+  //   }
+  // }, [])
+  const handleFormSubmit = (formData: any) => {
+    console.log('Form data submitted:', formData);
+    // Perform any other necessary actions with the form data
+  };
+
   return (
     <>
       <div className="grid md:grid-cols-2 h-screen">
@@ -83,7 +97,7 @@ export default function AuthenticationPage() {
                 .
               </p>
             </div>
-            <UserAuthForm />
+            <UserAuthForm onFormSubmit={handleFormSubmit} />
             <p className="px-8 text-center text-sm text-muted-foreground">
               By clicking continue, you agree to our{" "}
               <Link

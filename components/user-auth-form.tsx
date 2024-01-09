@@ -1,6 +1,5 @@
 "use client"
-
-import * as React from "react"
+import React, { useState } from 'react';
 import { cn } from "@/lib/utils"
 import * as zod from "zod";
 import { useForm } from "react-hook-form";
@@ -31,9 +30,18 @@ const formSchema = zod.object({
     }
 );
 
-interface UserAuthFormProps extends React.HTMLAttributes<HTMLDivElement> { }
+interface FormValues {
+    email: string;
+    password: string;
+    passwordConfirmation: string;
+}
 
-export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
+interface UserAuthFormProps {
+    onFormSubmit: (formData: FormValues) => void;
+    className?: string;
+}
+
+export function UserAuthForm({ className, onFormSubmit, ...props }: UserAuthFormProps) {
     const [isLoading, setIsLoading] = React.useState<boolean>(false)
 
     const form = useForm({
@@ -45,21 +53,42 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
         },
     });
 
-    const { formState } = form;
+    const [formData, setFormData] = useState<FormValues>({
+        email: '',
+        password: '',
+        passwordConfirmation: '',
+    });
 
-    async function onSubmit() {
-        console.log(form.getValues());
-        setIsLoading(true)
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = e.target;
+        setFormData((prevData) => ({
+            ...prevData,
+            [name]: value,
+        }));
+    };
 
-        setTimeout(() => {
-            setIsLoading(false)
-        }, 1000)
-    }
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        setIsLoading(true);
+        try {
+            formSchema.parse(formData);
+            console.log('Form data submitted:', formData);
+        } catch (error) {
+            if (error instanceof zod.ZodError) {
+                console.error("Le formulaire contient des erreurs de validation :", error.errors);
+            } else {
+                console.error("Une erreur s'est produite lors de la soumission du formulaire :", error);
+            }
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
 
     return (
         <div className={cn("grid gap-6", className)} {...props}>
             <Form {...form}>
-                <form onSubmit={form.handleSubmit(() => { onSubmit() })}>
+                <form onSubmit={handleSubmit} >
                     <div className="grid gap-2">
                         <div className="grid gap-1">
                             <FormField
@@ -76,6 +105,8 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
                                                     placeholder="Email"
                                                     type="email"
                                                     {...field}
+                                                    value={formData.email}
+                                                    onChange={handleInputChange}
                                                 />
                                             </FormControl>
                                             <FormMessage />
@@ -99,6 +130,8 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
                                                     placeholder="Password"
                                                     type="password"
                                                     {...field}
+                                                    value={formData.password}
+                                                    onChange={handleInputChange}
                                                 />
                                             </FormControl>
                                         </FormItem>
@@ -121,6 +154,8 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
                                                     placeholder="Password Confirmation"
                                                     type="password"
                                                     {...field}
+                                                    value={formData.passwordConfirmation}
+                                                    onChange={handleInputChange}
                                                 />
                                             </FormControl>
                                         </FormItem>
@@ -129,7 +164,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
                             />
                         </div>
                         <FormMessage className="text-red-500">
-                            {formState.isSubmitted && Object.keys(formState.errors).length > 0 && (
+                            {/* {formState.isSubmitted && Object.keys(formState.errors).length > 0 && (
                                 <span>
                                     Check email and/or {' '}
                                     <TooltipProvider>
@@ -150,7 +185,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
                                     </TooltipProvider>{' '}
                                     and try again.
                                 </span>
-                            )}
+                            )} */}
                         </FormMessage>
                         <Button variant="outline" disabled={isLoading}>
                             {isLoading && (
